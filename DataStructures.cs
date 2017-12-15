@@ -88,7 +88,17 @@ namespace assemblycounter
 
         protected internal override Dictionary<string, int> GetInstructionsInternal(Dictionary<string, CodeSegment> symbolTable)
         {
-            throw new NotImplementedException();
+            Dictionary<string, int> results = new Dictionary<string, int>(symbolTable[_callTag].GetInstructionsInternal(symbolTable));
+            if (results.ContainsKey("bl"))
+            {
+                results["bl"] += 1;
+            }
+            else
+            {
+                results["bl"] = 1;
+            }
+
+            return results;
         }
     }
 
