@@ -18,7 +18,38 @@ namespace assemblycounter
             string entry = "ScanADC";
             var result = root.GetInstructions(entry);
 
-            Console.WriteLine($"Counted {result.Select(x => x.Value).Aggregate((x,y)=> x+y)} instructions, {result.Count} unique executed when entering {entry}");
+            int instructionCount = result.Select(x => x.Value).Aggregate((x, y) => x + y);
+
+
+
+            Console.WriteLine($"Counted {CostCalculator.WorstCaseCycleCount(result)} cycles in {instructionCount} instructions, {result.Count} unique executed when entering {entry}");
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine();
+
+    
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine();
+
+            Console.ReadLine();
+        }
+
+        private static string GetNiceNumber(int instructionCount)
+        {
+
+            int divide = 0;
+            while (instructionCount > 2048)
+            {
+                divide++;
+                instructionCount /= 1024;
+            }
+
+           if (divide == 0)
+                return instructionCount.ToString();
+
+
+            return $"{instructionCount}{"bkMGT"[divide]}B";
         }
 
         private const string MARKER_START_MAGIC_STRING = "@START_OF_LOOP ITERATIONS ";
@@ -113,7 +144,31 @@ namespace assemblycounter
                 //That everything in first word is lovercase letters
                 if (line.Split((char[]) null, StringSplitOptions.None).First().All(char.IsLower))
                 {
-                    functionLines.Add(line);
+                    bool take = true;
+                    if (line[0] == 'b') //for branch
+                    {
+                        string target = line.Split((char[]) null, StringSplitOptions.None).Last();
+
+                        //local jump inside function. No need to count those (unless they are a loop, but no easy way to distinguish between known and unknown loop)
+                        //Or return
+                        if (target[0] == '.' || target == "lr")
+                        {
+                            
+                        }
+                        else
+                        {
+                            take = false;
+                            codeStack.Peek().Add(new RawCodeSegment(functionLines));
+                            functionLines.Clear();
+                            codeStack.Peek().Add(new CallingCodeSegment(target));
+                        }
+                    }
+
+                    if(take)
+                    {
+                        functionLines.Add(line);
+                    }
+
                     continue;
                 }
                 
