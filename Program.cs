@@ -12,8 +12,9 @@ namespace assemblycounter
     {
         static void Main(string[] args)
         {
-            var root = ParseFile(args[0]);
+            var root = new MultiCodeSegment(args.Select(ParseFile).Cast<MultiCodeSegment>().Select(x => x));
 
+            
             string entry = "ScanADC";
             var result = root.GetInstructions(entry);
 
